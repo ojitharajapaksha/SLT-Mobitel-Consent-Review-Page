@@ -165,10 +165,12 @@ If you need to update URLs after deployment:
    - Check if MongoDB Atlas IP whitelist includes Railway IPs (use 0.0.0.0/0)
    - Try accessing `/health` endpoint directly
 
-2. **path-to-regexp Error (FIXED):**
-   - Updated to Express 4.x for stability
-   - Express 5.x has breaking changes that cause routing issues
-   - If you see this error, ensure package.json uses `"express": "^4.19.2"`
+2. **path-to-regexp Error (CRITICAL FIX NEEDED):**
+   - **ISSUE:** You're still getting this error because changes haven't been deployed
+   - **SOLUTION:** Commit and push all changes to GitHub, then redeploy on Railway
+   - **EMERGENCY:** Use the minimal version in `app-minimal.js` if needed
+   - **VERIFY:** package.json must use `"express": "^4.19.2"` (not 5.x)
+   - **STATUS:** Fixed locally, needs Railway deployment
 
 3. **"Failed to fetch" errors:**
    - Check Railway backend is running
