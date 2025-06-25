@@ -23,37 +23,12 @@ const Authentication: React.FC<AuthenticationProps> = ({
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
 
   useEffect(() => {
-    // Simulate backend connection status check
-    const checkBackendStatus = async () => {
-      setBackendStatus('checking');
-      try {
-        // Replace with actual health check API call
-        await new Promise<void>((resolve, reject) => {
-          setTimeout(() => {
-            // Simulate random success/failure
-            Math.random() > 0.2 ? resolve() : reject();
-          }, 1000);
-        });
-        setBackendStatus('connected');
-      } catch {
-        setBackendStatus('disconnected');
-      }
-    };
-
-    checkBackendStatus();
-
-    // Optional: Re-check status every 10 seconds
-    const interval = setInterval(checkBackendStatus, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Enhanced useEffect to check backend connection with better error reporting
-  useEffect(() => {
     const checkBackendConnection = async () => {
+      setBackendStatus('checking');
       try {
         console.log('[Authentication] Checking backend connection...');
         
-        // Test basic fetch first
+        // Test health endpoint
         const testResponse = await fetch('http://localhost:3000/health', {
           method: 'GET',
           headers: {
@@ -85,6 +60,10 @@ const Authentication: React.FC<AuthenticationProps> = ({
     };
     
     checkBackendConnection();
+
+    // Optional: Re-check status every 30 seconds
+    const interval = setInterval(checkBackendConnection, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const themeClasses = darkMode 

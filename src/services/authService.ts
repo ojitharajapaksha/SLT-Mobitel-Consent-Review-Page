@@ -91,7 +91,7 @@ class AuthService {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/tmf-api/auth/v1/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ class AuthService {
         body: JSON.stringify({
           email,
           password,
-          userType
+          accountType: userType
         }),
       });
 
@@ -110,10 +110,6 @@ class AuthService {
 
       const data = await response.json();
       
-      if (!data.success) {
-        throw new Error('Authentication failed');
-      }
-
       // Store the token for future requests
       if (data.token) {
         localStorage.setItem('auth_token', data.token);
