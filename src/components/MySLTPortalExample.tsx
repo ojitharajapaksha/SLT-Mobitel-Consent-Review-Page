@@ -144,84 +144,9 @@ const MySLTDashboard: React.FC<{ user: any }> = ({ user }) => {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Bill & Payments */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Bill & Payments</h3>
-            <div className="space-y-3">
-              <button className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                View Current Bill
-              </button>
-              <button className="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                Make Payment
-              </button>
-            </div>
-          </div>
-
-          {/* Services */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">My Services</h3>
-            <div className="space-y-3">
-              <button className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">
-                Manage Services
-              </button>
-              <button className="w-full bg-orange-600 text-white py-2 px-4 rounded hover:bg-orange-700">
-                Add New Service
-              </button>
-            </div>
-          </div>
-
-          {/* Privacy & Consent */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Privacy & Consent</h3>
-            <div className="space-y-3">
-              <p className="text-sm text-gray-600">
-                ✅ TMF632 Consent Collected
-              </p>
-              <button className="w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700">
-                Manage Consent Preferences
-              </button>
-            </div>
-          </div>
-
-          {/* Support */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Support</h3>
-            <div className="space-y-3">
-              <button className="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
-                Contact Support
-              </button>
-              <button className="w-full bg-yellow-600 text-white py-2 px-4 rounded hover:bg-yellow-700">
-                Help Center
-              </button>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <button className="w-full bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700">
-                Data Usage
-              </button>
-              <button className="w-full bg-pink-600 text-white py-2 px-4 rounded hover:bg-pink-700">
-                Service Requests
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Compliance Notice */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <div className="text-blue-600 mr-2">🛡️</div>
-            <div>
-              <p className="text-sm font-medium text-blue-800">TMF632 Compliance</p>
-              <p className="text-xs text-blue-600">
-                Your data is processed in accordance with TMF632 Party Management standards and Sri Lankan data protection laws.
-              </p>
-            </div>
-          </div>
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Welcome to MySLT Portal</h2>
+          <p className="text-gray-600">Your enhanced MySLT experience with TMF632 compliant data processing.</p>
         </div>
       </div>
     </div>
