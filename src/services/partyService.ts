@@ -113,9 +113,9 @@ export interface ConsentRecord {
   userAgent?: string;
 }
 
-const API_BASE_URL = 'http://localhost:3000/tmf-api/party/v5';
-const CONSENT_API_URL = 'http://localhost:3000/tmf-api/consent/v1';
-const HEALTH_URL = 'http://localhost:3000/health';
+const API_BASE_URL = import.meta.env.VITE_TMF_API_BASE_URL || 'http://localhost:3000/tmf-api/party/v5';
+const CONSENT_API_URL = import.meta.env.VITE_CONSENT_API_URL || 'http://localhost:3000/tmf-api/consent/v1';
+const HEALTH_URL = import.meta.env.VITE_HEALTH_URL || 'http://localhost:3000/health';
 
 class PartyService {
   // Helper method to handle fetch with better error messages

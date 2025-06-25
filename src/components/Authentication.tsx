@@ -29,7 +29,8 @@ const Authentication: React.FC<AuthenticationProps> = ({
         console.log('[Authentication] Checking backend connection...');
         
         // Test health endpoint
-        const testResponse = await fetch('http://localhost:3000/health', {
+        const healthUrl = import.meta.env.VITE_HEALTH_URL || 'http://localhost:3000/health';
+        const testResponse = await fetch(healthUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

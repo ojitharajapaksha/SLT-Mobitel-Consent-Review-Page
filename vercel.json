@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "name": "myslt-consent-management",
+  "builds": [
+    {
+      "src": "dist/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_API_BASE_URL": "@api_base_url",
+    "VITE_HEALTH_URL": "@health_url",
+    "VITE_TMF_API_BASE_URL": "@tmf_api_base_url",
+    "VITE_CONSENT_API_URL": "@consent_api_url"
+  }
+}
