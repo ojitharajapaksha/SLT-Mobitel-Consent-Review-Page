@@ -259,7 +259,7 @@ const ConsentReviewPage: React.FC<ConsentReviewPageProps> = ({
         <div className="p-8 pt-4 space-y-3">
           <div className="mb-3">
             <a 
-              href="https://myslt.slt.lk/consent-management"
+              href="https://consent-management-system-api.vercel.app/"
               className={`text-xs inline-flex items-center space-x-1 px-3 py-1.5 rounded-full border transition-colors duration-200 ${
                 darkMode 
                   ? 'border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white' 
