@@ -5,18 +5,22 @@ export interface AuthSession {
   userType: 'individual' | 'organization';
   isAuthenticated: boolean;
   loginTime: string;
+  token?: string;
 }
+
+const API_BASE_URL = 'http://localhost:3000';
 
 class AuthService {
   private static readonly SESSION_KEY = 'auth_session';
 
   // Save authentication session to localStorage
-  saveSession(user: Individual | Organization, userType: 'individual' | 'organization'): AuthSession {
+  saveSession(user: Individual | Organization, userType: 'individual' | 'organization', token?: string): AuthSession {
     const session: AuthSession = {
       user,
       userType,
       isAuthenticated: true,
-      loginTime: new Date().toISOString()
+      loginTime: new Date().toISOString(),
+      token
     };
 
     try {
@@ -80,15 +84,57 @@ class AuthService {
     return session?.userType || null;
   }
 
-  // Mock authentication (for demo purposes)
+  // Real authentication with backend API
   async authenticateUser(email: string, password: string, userType: 'individual' | 'organization'): Promise<Individual | Organization> {
-    // In a real application, this would make an API call to verify credentials
-    // For demo purposes, we'll create a mock user
-    
     if (!email || !password) {
       throw new Error('Email and password are required');
     }
 
+    try {
+      const response = await fetch(`${API_BASE_URL}/tmf-api/auth/v1/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          userType
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Authentication failed');
+      }
+
+      const data = await response.json();
+      
+      if (!data.success) {
+        throw new Error('Authentication failed');
+      }
+
+      // Store the token for future requests
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
+
+      return data.user;
+    } catch (error: any) {
+      console.error('Authentication error:', error);
+      
+      // If backend is not available, fall back to mock authentication
+      if (error.message.includes('fetch')) {
+        console.warn('Backend not available, using mock authentication');
+        return this.mockAuthenticateUser(email, password, userType);
+      }
+      
+      throw error;
+    }
+  }
+
+  // Mock authentication (fallback when backend is not available)
+  private async mockAuthenticateUser(email: string, password: string, userType: 'individual' | 'organization'): Promise<Individual | Organization> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -98,7 +144,17 @@ class AuthService {
       givenName: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1),
       familyName: 'User',
       gender: 'prefer-not-to-say',
-      contactMedium: [{ type: 'email', value: email }],
+      nationality: 'LK',
+      status: 'active',
+      contactMedium: [{ 
+        type: 'email', 
+        value: email, 
+        preferred: true,
+        validFor: {
+          startDateTime: new Date(),
+          endDateTime: null
+        }
+      }],
       languageAbility: [],
       skill: [],
       individualIdentification: [],
@@ -109,9 +165,20 @@ class AuthService {
     } as Individual : {
       _id: `demo_organization_${Date.now()}`,
       name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1) + ' Organization',
-      organizationType: 'company',
+      tradingName: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1) + ' Organization',
+      organizationType: 'private-company',
       isLegalEntity: true,
-      contactMedium: [{ type: 'email', value: email }],
+      isHeadOffice: true,
+      status: 'active',
+      contactMedium: [{ 
+        type: 'email', 
+        value: email, 
+        preferred: true,
+        validFor: {
+          startDateTime: new Date(),
+          endDateTime: null
+        }
+      }],
       externalReference: [],
       organizationChildRelationship: [],
       organizationParentRelationship: [],

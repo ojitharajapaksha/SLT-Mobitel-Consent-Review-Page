@@ -115,16 +115,25 @@ export interface ConsentRecord {
 
 const API_BASE_URL = 'http://localhost:3000/tmf-api/party/v5';
 const CONSENT_API_URL = 'http://localhost:3000/tmf-api/consent/v1';
+const HEALTH_URL = 'http://localhost:3000/health';
 
 class PartyService {
   // Helper method to handle fetch with better error messages
   private async fetchWithErrorHandling(url: string, options?: RequestInit): Promise<Response> {
     try {
+      console.log(`[PartyService] Making request to: ${url}`);
+      console.log(`[PartyService] Request options:`, options);
+      
       const response = await fetch(url, options);
+      
+      console.log(`[PartyService] Response status: ${response.status} ${response.statusText}`);
+      console.log(`[PartyService] Response headers:`, [...response.headers.entries()]);
+      
       return response;
     } catch (error) {
-      console.error('Network error:', error);
-      throw new Error('Unable to connect to server. Please ensure the backend is running on port 3000.');
+      console.error(`[PartyService] Network error for ${url}:`, error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Unable to connect to server. Please ensure the backend is running on port 3000. Error: ${errorMessage}`);
     }
   }
   // Individual methods
@@ -376,7 +385,7 @@ class PartyService {
   // Health check method
   async testConnection(): Promise<boolean> {
     try {
-      const response = await this.fetchWithErrorHandling(`${API_BASE_URL.replace('/tmf-api/party/v5', '')}/health`);
+      const response = await this.fetchWithErrorHandling(HEALTH_URL);
       return response.ok;
     } catch (error) {
       console.error('Backend connection test failed:', error);

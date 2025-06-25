@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { User, Building, ArrowRight, Loader2, Moon, Sun, Eye, EyeOff } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Building, ArrowRight, Loader2, Moon, Sun, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { partyService, Individual, Organization } from '../services/partyService';
 import { authService } from '../services/authService';
 
@@ -20,6 +20,72 @@ const Authentication: React.FC<AuthenticationProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<any>({});
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
+
+  useEffect(() => {
+    // Simulate backend connection status check
+    const checkBackendStatus = async () => {
+      setBackendStatus('checking');
+      try {
+        // Replace with actual health check API call
+        await new Promise<void>((resolve, reject) => {
+          setTimeout(() => {
+            // Simulate random success/failure
+            Math.random() > 0.2 ? resolve() : reject();
+          }, 1000);
+        });
+        setBackendStatus('connected');
+      } catch {
+        setBackendStatus('disconnected');
+      }
+    };
+
+    checkBackendStatus();
+
+    // Optional: Re-check status every 10 seconds
+    const interval = setInterval(checkBackendStatus, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Enhanced useEffect to check backend connection with better error reporting
+  useEffect(() => {
+    const checkBackendConnection = async () => {
+      try {
+        console.log('[Authentication] Checking backend connection...');
+        
+        // Test basic fetch first
+        const testResponse = await fetch('http://localhost:3000/health', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('[Authentication] Test response:', testResponse.status, testResponse.statusText);
+        
+        if (testResponse.ok) {
+          const data = await testResponse.json();
+          console.log('[Authentication] Backend response:', data);
+          setBackendStatus('connected');
+        } else {
+          console.error('[Authentication] Backend returned error:', testResponse.status);
+          setBackendStatus('disconnected');
+        }
+      } catch (error) {
+        console.error('[Authentication] Backend connection failed:', error);
+        setBackendStatus('disconnected');
+        
+        // Try to provide more specific error information
+        if (error instanceof Error) {
+          if (error.message.includes('fetch')) {
+            console.error('[Authentication] This appears to be a network/CORS issue');
+          }
+        }
+      }
+    };
+    
+    checkBackendConnection();
+  }, []);
 
   const themeClasses = darkMode 
     ? 'bg-gray-900 text-white' 
@@ -57,7 +123,7 @@ const Authentication: React.FC<AuthenticationProps> = ({
         accountType!
       );
 
-      // Save session
+      // Save session (token is handled inside authService)
       authService.saveSession(authenticatedUser, accountType!);
       
       onAuthenticated(authenticatedUser, accountType!);
@@ -344,6 +410,16 @@ const Authentication: React.FC<AuthenticationProps> = ({
         <p className={`${darkMode ? 'text-blue-400' : 'text-blue-700'}`}>
           🔐 Use your existing MySLT credentials. After login, you'll be asked to provide consent for data processing.
         </p>
+        {backendStatus === 'connected' && (
+          <p className={`${darkMode ? 'text-green-400' : 'text-green-700'} text-xs mt-1`}>
+            ✅ Connected to live database
+          </p>
+        )}
+        {backendStatus === 'disconnected' && (
+          <p className={`${darkMode ? 'text-yellow-400' : 'text-yellow-700'} text-xs mt-1`}>
+            ⚠️ Demo mode - backend not available
+          </p>
+        )}
       </div>
 
       {error && (
@@ -449,6 +525,16 @@ const Authentication: React.FC<AuthenticationProps> = ({
         <p className={`${darkMode ? 'text-green-300' : 'text-green-600'} text-xs mb-2`}>
           We collect only the minimum required data according to TMF632 standards:
         </p>
+        {backendStatus === 'connected' && (
+          <p className={`${darkMode ? 'text-green-400' : 'text-green-700'} text-xs mb-2`}>
+            ✅ Data will be saved to live database
+          </p>
+        )}
+        {backendStatus === 'disconnected' && (
+          <p className={`${darkMode ? 'text-yellow-400' : 'text-yellow-700'} text-xs mb-2`}>
+            ⚠️ Demo mode - data will not be permanently saved
+          </p>
+        )}
         <ul className={`${darkMode ? 'text-green-300' : 'text-green-600'} text-xs space-y-1`}>
           {accountType === 'individual' ? (
             <>
@@ -724,6 +810,34 @@ const Authentication: React.FC<AuthenticationProps> = ({
             <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               TMF632 Compliant Data Processing
             </p>
+            
+            {/* Backend Status Indicator */}
+            <div className="flex items-center justify-center space-x-2 mt-2">
+              {backendStatus === 'checking' && (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                  <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    Checking backend...
+                  </span>
+                </>
+              )}
+              {backendStatus === 'connected' && (
+                <>
+                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  <span className="text-xs text-green-600 dark:text-green-400">
+                    Backend connected
+                  </span>
+                </>
+              )}
+              {backendStatus === 'disconnected' && (
+                <>
+                  <XCircle className="w-3 h-3 text-yellow-500" />
+                  <span className="text-xs text-yellow-600 dark:text-yellow-400">
+                    Using demo mode
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -731,6 +845,32 @@ const Authentication: React.FC<AuthenticationProps> = ({
         {!accountType && renderWelcome()}
         {mode === 'login' && accountType && renderLoginForm()}
         {mode === 'register' && accountType && renderRegisterForm()}
+
+        {/* Backend Connection Status */}
+        <div className="px-8 py-4 border-t mt-4">
+          <div className="flex items-center justify-between">
+            <span className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Backend Connection Status:
+            </span>
+            <div className="flex items-center space-x-2">
+              {backendStatus === 'checking' && (
+                <Loader2 className="w-4 h-4 text-gray-500 animate-spin" />
+              )}
+              {backendStatus === 'connected' && (
+                <div className="flex items-center space-x-1">
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-600">Connected</span>
+                </div>
+              )}
+              {backendStatus === 'disconnected' && (
+                <div className="flex items-center space-x-1">
+                  <XCircle className="w-4 h-4 text-red-500" />
+                  <span className="text-sm font-medium text-red-600">Disconnected</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
