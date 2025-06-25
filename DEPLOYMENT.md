@@ -165,18 +165,23 @@ If you need to update URLs after deployment:
    - Check if MongoDB Atlas IP whitelist includes Railway IPs (use 0.0.0.0/0)
    - Try accessing `/health` endpoint directly
 
-2. **"Failed to fetch" errors:**
+2. **path-to-regexp Error (FIXED):**
+   - Updated to Express 4.x for stability
+   - Express 5.x has breaking changes that cause routing issues
+   - If you see this error, ensure package.json uses `"express": "^4.19.2"`
+
+3. **"Failed to fetch" errors:**
    - Check Railway backend is running
    - Verify environment variables in Vercel
    - Check browser console for CORS errors
 
-3. **Backend not starting:**
+4. **Backend not starting:**
    - Check MongoDB connection string format
    - Verify Railway environment variables
    - Check Railway deployment logs
    - Ensure MongoDB user has correct permissions
 
-4. **Frontend not building:**
+5. **Frontend not building:**
    - Check all environment variables are set
    - Verify build command is `npm run build`
    - Check Vercel build logs
