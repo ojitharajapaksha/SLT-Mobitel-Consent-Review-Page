@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Authentication from './components/Authentication';
+import DebugConnection from './components/DebugConnection';
 import { partyService, Individual, Organization } from './services/partyService';
 import './services/debugService'; // Import to trigger debug logging
 
@@ -72,11 +73,14 @@ function App() {
 
   // Always show authentication, redirect happens after successful auth
   return (
-    <Authentication
-      onAuthenticated={handleAuthenticated}
-      darkMode={darkMode}
-      onToggleDarkMode={toggleDarkMode}
-    />
+    <>
+      <Authentication
+        onAuthenticated={handleAuthenticated}
+        darkMode={darkMode}
+        onToggleDarkMode={toggleDarkMode}
+      />
+      <DebugConnection />
+    </>
   );
 }
 
