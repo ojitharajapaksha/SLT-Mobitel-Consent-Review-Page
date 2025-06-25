@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Authentication from './components/Authentication';
 import { partyService, Individual, Organization } from './services/partyService';
-import { authService } from './services/authService';
 import './services/debugService'; // Import to trigger debug logging
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
-  // Check for existing session on app load
-  useEffect(() => {
-    const existingSession = authService.getSession();
-    if (existingSession && existingSession.isAuthenticated) {
-      // Redirect directly to MySLT website if already authenticated
-      window.location.href = 'https://myslt.slt.lk/';
-    }
-  }, []);
+  // Note: Removed automatic redirect to allow users to always access the authentication page
 
   const handleAuthenticated = async (party: Individual | Organization, type: 'individual' | 'organization') => {
     try {
