@@ -52,12 +52,13 @@ const ConsentReviewPage: React.FC<ConsentReviewPageProps> = ({
       return;
     }
     onAgree?.(consents);
-    // Redirect to SLT website
-    window.location.href = 'https://myslt.slt.lk/';
+    // Navigation is now handled by the parent component
   };
 
   const handleDecline = () => {
     onDecline?.();
+    // Redirect to SLT website when user declines
+    window.location.href = 'https://myslt.slt.lk/';
   };
 
   const themeClasses = darkMode 
