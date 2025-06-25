@@ -1,19 +1,22 @@
 import { useState } from 'react';
 import ConsentReviewPage from './components/ConsentReviewPage';
+import PartySelectionPage, { type PartyType } from './components/PartySelectionPage';
 import SignInPage from './components/SignInPage';
 import SignUpPage from './components/SignUpPage';
 import ForgotPasswordPage from './components/ForgotPasswordPage';
+import ApiTestComponent from './components/ApiTestComponent';
 
-type AppPage = 'consent' | 'signin' | 'signup' | 'forgot-password';
+type AppPage = 'consent' | 'partySelection' | 'signin' | 'signup' | 'forgot-password';
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [currentPage, setCurrentPage] = useState<AppPage>('consent');
+  const [selectedPartyType, setSelectedPartyType] = useState<PartyType>('individual');
 
   const handleAgree = (consents: any) => {
     console.log('User consents:', consents);
-    // Navigate to sign in page after consent is given
-    setCurrentPage('signin');
+    // Navigate to party selection page after consent is given
+    setCurrentPage('partySelection');
   };
 
   const handleDecline = () => {
@@ -28,10 +31,17 @@ function App() {
     // The redirect to SLT website is handled in the SignInPage component
   };
 
-  const handleSignUp = (userData: any) => {
-    console.log('User signed up:', userData);
+  const handleSignUp = (userData: any, partyId: string) => {
+    console.log('User signed up:', userData, 'Party ID:', partyId);
     // Here you would typically create the user account
+    alert('Account created successfully! You can now sign in.');
     setCurrentPage('signin'); // Redirect to sign in after successful signup
+  };
+
+  const handlePartySelect = (partyType: PartyType) => {
+    console.log('Selected party type:', partyType);
+    setSelectedPartyType(partyType);
+    setCurrentPage('signin');
   };
 
   const handleForgotPassword = (email: string) => {
@@ -41,6 +51,10 @@ function App() {
 
   const handleBackToConsent = () => {
     setCurrentPage('consent');
+  };
+
+  const handleBackToPartySelection = () => {
+    setCurrentPage('partySelection');
   };
 
   const handleGoToSignUp = () => {
@@ -71,11 +85,20 @@ function App() {
             onToggleDarkMode={toggleDarkMode}
           />
         );
+      case 'partySelection':
+        return (
+          <PartySelectionPage
+            onPartySelect={handlePartySelect}
+            onBack={handleBackToConsent}
+            darkMode={darkMode}
+            onToggleDarkMode={toggleDarkMode}
+          />
+        );
       case 'signin':
         return (
           <SignInPage
             onSignIn={handleSignIn}
-            onBack={handleBackToConsent}
+            onBack={handleBackToPartySelection}
             onForgotPassword={handleGoToForgotPassword}
             onSignUp={handleGoToSignUp}
             darkMode={darkMode}
@@ -89,6 +112,7 @@ function App() {
             onBack={handleBackToSignIn}
             darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
+            partyType={selectedPartyType}
           />
         );
       case 'forgot-password':
@@ -107,6 +131,7 @@ function App() {
 
   return (
     <div className="App">
+      <ApiTestComponent />
       {renderCurrentPage()}
     </div>
   );

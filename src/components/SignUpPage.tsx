@@ -1,31 +1,23 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Moon, Sun, ArrowLeft, Check } from 'lucide-react';
+import { partyManagementService, type PartyType, type SignUpFormData } from '../services/partyManagementService';
 
 interface SignUpPageProps {
-  onSignUp?: (userData: SignUpData) => void;
+  onSignUp?: (userData: SignUpFormData, partyId: string) => void;
   onBack?: () => void;
   darkMode?: boolean;
   onToggleDarkMode?: () => void;
-}
-
-interface SignUpData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  password: string;
-  confirmPassword: string;
-  agreeToTerms: boolean;
-  subscribeToNewsletter: boolean;
+  partyType: PartyType;
 }
 
 const SignUpPage: React.FC<SignUpPageProps> = ({
   onSignUp,
   onBack,
   darkMode = false,
-  onToggleDarkMode
+  onToggleDarkMode,
+  partyType
 }) => {
-  const [userData, setUserData] = useState<SignUpData>({
+  const [userData, setUserData] = useState<SignUpFormData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -33,7 +25,11 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
     password: '',
     confirmPassword: '',
     agreeToTerms: false,
-    subscribeToNewsletter: false
+    subscribeToNewsletter: false,
+    // Organization fields
+    organizationName: '',
+    organizationType: 'company',
+    businessRegistrationNumber: ''
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -41,10 +37,10 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
-  const handleInputChange = (field: keyof SignUpData) => (
-    e: React.ChangeEvent<HTMLInputElement>
+  const handleInputChange = (field: keyof SignUpFormData) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
     setUserData(prev => ({
       ...prev,
       [field]: value
@@ -82,6 +78,13 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
       newErrors.phone = 'Please enter a valid phone number';
     }
 
+    // Organization-specific validation
+    if (partyType === 'organization') {
+      if (!userData.organizationName?.trim()) {
+        newErrors.organizationName = 'Organization name is required';
+      }
+    }
+
     if (!userData.password) {
       newErrors.password = 'Password is required';
     } else if (userData.password.length < 8) {
@@ -113,12 +116,25 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      let response;
+      if (partyType === 'individual') {
+        response = await partyManagementService.createIndividual(userData);
+      } else {
+        response = await partyManagementService.createOrganization(userData);
+      }
+      
+      console.log('Party created successfully:', response);
+      onSignUp?.(userData, response._id || response.id);
+    } catch (error) {
+      console.error('Error creating party:', error);
+      setErrors({ 
+        ...errors, 
+        submit: error instanceof Error ? error.message : 'Failed to create account. Please try again.' 
+      });
+    } finally {
       setIsLoading(false);
-      onSignUp?.(userData);
-      // You can add success message or redirect logic here
-    }, 2000);
+    }
   };
 
   const themeClasses = darkMode 
@@ -170,10 +186,10 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
           
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-              Create Account
+              Create {partyType === 'individual' ? 'Individual' : 'Organization'} Account
             </h1>
             <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-              Join the SLT Mobitel family today
+              Join the SLT Mobitel family today as {partyType === 'individual' ? 'an individual customer' : 'a business partner'}
             </p>
           </div>
         </div>
@@ -268,6 +284,76 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
               <p className="text-xs text-red-500">{errors.phone}</p>
             )}
           </div>
+
+          {/* Organization-specific fields */}
+          {partyType === 'organization' && (
+            <>
+              {/* Organization Name */}
+              <div className="space-y-2">
+                <label 
+                  htmlFor="organizationName"
+                  className={`block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
+                >
+                  Organization Name
+                </label>
+                <input
+                  id="organizationName"
+                  type="text"
+                  value={userData.organizationName}
+                  onChange={handleInputChange('organizationName')}
+                  className={`w-full px-3 py-2.5 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${inputClasses}`}
+                  placeholder="Enter organization name"
+                  disabled={isLoading}
+                />
+                {errors.organizationName && (
+                  <p className="text-xs text-red-500">{errors.organizationName}</p>
+                )}
+              </div>
+
+              {/* Organization Type */}
+              <div className="space-y-2">
+                <label 
+                  htmlFor="organizationType"
+                  className={`block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
+                >
+                  Organization Type
+                </label>
+                <select
+                  id="organizationType"
+                  value={userData.organizationType}
+                  onChange={handleInputChange('organizationType')}
+                  className={`w-full px-3 py-2.5 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${inputClasses}`}
+                  disabled={isLoading}
+                >
+                  <option value="company">Company</option>
+                  <option value="partnership">Partnership</option>
+                  <option value="sole_proprietorship">Sole Proprietorship</option>
+                  <option value="nonprofit">Non-Profit</option>
+                  <option value="government">Government</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              {/* Business Registration Number */}
+              <div className="space-y-2">
+                <label 
+                  htmlFor="businessRegistrationNumber"
+                  className={`block text-sm font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}
+                >
+                  Business Registration Number (Optional)
+                </label>
+                <input
+                  id="businessRegistrationNumber"
+                  type="text"
+                  value={userData.businessRegistrationNumber}
+                  onChange={handleInputChange('businessRegistrationNumber')}
+                  className={`w-full px-3 py-2.5 rounded-lg border transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${inputClasses}`}
+                  placeholder="Enter business registration number"
+                  disabled={isLoading}
+                />
+              </div>
+            </>
+          )}
 
           {/* Password Field */}
           <div className="space-y-2">
@@ -402,6 +488,13 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
               </div>
             </label>
           </div>
+
+          {/* Submit Error */}
+          {errors.submit && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-400">{errors.submit}</p>
+            </div>
+          )}
 
           {/* Sign Up Button */}
           <button
