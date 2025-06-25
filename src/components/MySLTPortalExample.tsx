@@ -145,16 +145,6 @@ const MySLTDashboard: React.FC<{ user: any }> = ({ user }) => {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Account Overview */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Account Overview</h3>
-            <div className="space-y-2">
-              <p><span className="font-medium">Account Type:</span> {user?.accountType}</p>
-              <p><span className="font-medium">Customer ID:</span> {user?.id}</p>
-              <p><span className="font-medium">Email:</span> {user?.email}</p>
-            </div>
-          </div>
-
           {/* Bill & Payments */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4">Bill & Payments</h3>
