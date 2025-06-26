@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_TMF_API_BASE_URL || 'https://party-management-api-production.up.railway.app/tmf-api/partyManagement/v4';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 // API client with proper error handling
 class ApiClient {
@@ -230,8 +230,8 @@ export const partyApi = {
 export const testApiConnection = async (): Promise<boolean> => {
   try {
     console.log('Testing API connection...');
-    const healthUrl = import.meta.env.VITE_HEALTH_URL || 'https://party-management-api-production.up.railway.app/health';
-    const response = await fetch(healthUrl);
+    const healthUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${healthUrl}/health`);
     if (response.ok) {
       console.log('API connection successful');
       return true;

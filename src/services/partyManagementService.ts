@@ -1,47 +1,122 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://party-management-api-production.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 // Interface definitions for API requests
 export interface IndividualData {
   givenName: string;
   familyName: string;
+  fullName?: string;
+  title?: string;
   birthDate?: string;
-  gender?: string;
+  countryOfBirth?: string;
+  gender?: 'male' | 'female' | 'other' | 'unknown';
+  maritalStatus?: 'single' | 'married' | 'divorced' | 'widowed' | 'separated' | 'unknown';
   nationality?: string;
-  status?: string;
+  placeOfBirth?: string;
+  status?: 'initialized' | 'validated' | 'active' | 'inactive' | 'terminated';
   contactMedium?: Array<{
-    mediumType: string;
+    mediumType: 'email' | 'phone' | 'mobile' | 'fax' | 'pager' | 'sms' | 'landline' | 'other';
     preferred: boolean;
     characteristic: {
       emailAddress?: string;
       phoneNumber?: string;
+      faxNumber?: string;
+      city?: string;
+      country?: string;
+      postCode?: string;
+      stateOrProvince?: string;
+      street1?: string;
+      street2?: string;
+    };
+    validFor?: {
+      startDateTime?: Date;
+      endDateTime?: Date;
     };
   }>;
-  individualIdentification?: Array<{
-    identificationType: string;
-    identificationId: string;
+  languageAbility?: Array<{
+    languageCode?: string;
+    languageName?: string;
+    listeningProficiency?: string;
+    readingProficiency?: string;
+    speakingProficiency?: string;
+    writingProficiency?: string;
+    isFavouriteLanguage?: boolean;
   }>;
+  skill?: Array<{
+    skillCode?: string;
+    skillName?: string;
+    comment?: string;
+    evaluatedLevel?: string;
+    skillCategory?: string;
+  }>;
+  individualIdentification?: Array<{
+    identificationType: 'passport' | 'nationalId' | 'drivingLicense' | 'socialSecurity' | 'other';
+    identificationId: string;
+    issuingAuthority?: string;
+    issuingDate?: Date;
+    validFor?: {
+      startDateTime?: Date;
+      endDateTime?: Date;
+    };
+  }>;
+  authenticationContext?: {
+    email?: string;
+    agreedToTerms?: boolean;
+    subscribedToNewsletter?: boolean;
+    accountCreationDate?: Date;
+  };
 }
 
 export interface OrganizationData {
   name: string;
   tradingName?: string;
-  organizationType?: string;
-  isLegalEntity?: boolean;
+  nameType?: 'legal' | 'trading' | 'brand' | 'other';
+  organizationType?: 'company' | 'partnership' | 'sole_proprietorship' | 'nonprofit' | 'government' | 'corporation' | 'llc' | 'other';
+  existsDuring?: {
+    startDateTime?: Date;
+    endDateTime?: Date;
+  };
   isHeadOffice?: boolean;
-  status?: string;
+  isLegalEntity?: boolean;
+  status?: 'initialized' | 'validated' | 'active' | 'inactive' | 'terminated';
   contactMedium?: Array<{
-    mediumType: string;
+    mediumType: 'email' | 'phone' | 'mobile' | 'fax' | 'pager' | 'sms' | 'landline' | 'website' | 'other';
     preferred: boolean;
     characteristic: {
       emailAddress?: string;
       phoneNumber?: string;
+      faxNumber?: string;
+      website?: string;
+      socialNetworkId?: string;
+      city?: string;
+      country?: string;
+      postCode?: string;
+      stateOrProvince?: string;
+      street1?: string;
+      street2?: string;
+    };
+    validFor?: {
+      startDateTime?: Date;
+      endDateTime?: Date;
     };
   }>;
   organizationIdentification?: Array<{
-    identificationType: string;
+    identificationType: 'businessRegistration' | 'taxId' | 'vatNumber' | 'duns' | 'lei' | 'other';
     identificationId: string;
+    issuingAuthority?: string;
+    issuingDate?: Date;
+    validFor?: {
+      startDateTime?: Date;
+      endDateTime?: Date;
+    };
   }>;
+  authenticationContext?: {
+    contactEmail?: string;
+    contactPersonName?: string;
+    agreedToTerms?: boolean;
+    subscribedToNewsletter?: boolean;
+    accountCreationDate?: Date;
+  };
 }
 
 export interface SignUpFormData {
@@ -55,7 +130,7 @@ export interface SignUpFormData {
   subscribeToNewsletter: boolean;
   // Additional organization fields
   organizationName?: string;
-  organizationType?: string;
+  organizationType?: 'company' | 'partnership' | 'sole_proprietorship' | 'nonprofit' | 'government' | 'corporation' | 'llc' | 'other';
   businessRegistrationNumber?: string;
 }
 
@@ -126,6 +201,7 @@ class PartyManagementService {
     const individualData: IndividualData = {
       givenName: formData.firstName,
       familyName: formData.lastName,
+      fullName: `${formData.firstName} ${formData.lastName}`,
       status: 'active',
       contactMedium: [
         {
@@ -143,18 +219,38 @@ class PartyManagementService {
           },
         },
       ],
+      authenticationContext: {
+        email: formData.email,
+        agreedToTerms: formData.agreeToTerms,
+        subscribedToNewsletter: formData.subscribeToNewsletter,
+        accountCreationDate: new Date(),
+      }
+    };
+
+    // Include password for backend processing (will be hashed there)
+    const requestData = {
+      ...individualData,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      // Also send original form field names for backend compatibility
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      agreeToTerms: formData.agreeToTerms,
+      subscribeToNewsletter: formData.subscribeToNewsletter,
     };
 
     return this.makeRequest('/tmf-api/party/v5/individual', {
       method: 'POST',
-      body: JSON.stringify(individualData),
+      body: JSON.stringify(requestData),
     });
   }
 
   // Create Organization Party
   async createOrganization(formData: SignUpFormData): Promise<any> {
     const organizationData: OrganizationData = {
-      name: formData.organizationName || `${formData.firstName} ${formData.lastName}`,
+      name: formData.organizationName || `${formData.firstName} ${formData.lastName} Organization`,
       tradingName: formData.organizationName,
       organizationType: formData.organizationType || 'company',
       isLegalEntity: true,
@@ -176,6 +272,13 @@ class PartyManagementService {
           },
         },
       ],
+      authenticationContext: {
+        contactEmail: formData.email,
+        contactPersonName: `${formData.firstName} ${formData.lastName}`,
+        agreedToTerms: formData.agreeToTerms,
+        subscribedToNewsletter: formData.subscribeToNewsletter,
+        accountCreationDate: new Date(),
+      }
     };
 
     if (formData.businessRegistrationNumber) {
@@ -183,13 +286,31 @@ class PartyManagementService {
         {
           identificationType: 'businessRegistration',
           identificationId: formData.businessRegistrationNumber,
+          issuingDate: new Date(),
         },
       ];
     }
 
+    // Include password for backend processing (will be hashed there)
+    const requestData = {
+      ...organizationData,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      // Also send original form field names for backend compatibility
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      organizationName: formData.organizationName,
+      organizationType: formData.organizationType,
+      businessRegistrationNumber: formData.businessRegistrationNumber,
+      agreeToTerms: formData.agreeToTerms,
+      subscribeToNewsletter: formData.subscribeToNewsletter,
+    };
+
     return this.makeRequest('/tmf-api/party/v5/organization', {
       method: 'POST',
-      body: JSON.stringify(organizationData),
+      body: JSON.stringify(requestData),
     });
   }
 
