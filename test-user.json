@@ -1,0 +1,15 @@
+{
+  "givenName": "Test",
+  "familyName": "User",
+  "fullName": "Test User",
+  "status": "active",
+  "contactMedium": [
+    {
+      "mediumType": "email",
+      "preferred": true,
+      "characteristic": {
+        "emailAddress": "testuser@example.com"
+      }
+    }
+  ]
+}

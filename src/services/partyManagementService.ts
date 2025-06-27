@@ -1,6 +1,10 @@
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+// Debug: Log the API base URL
+console.log('🔗 API_BASE_URL:', API_BASE_URL);
+console.log('🔗 Environment vars:', import.meta.env);
+
 // Interface definitions for API requests
 export interface IndividualData {
   givenName: string;
@@ -152,12 +156,13 @@ class PartyManagementService {
     };
 
     try {
-      console.log(`Making request to: ${url}`);
-      console.log('Request config:', config);
+      console.log(`🚀 Making request to: ${url}`);
+      console.log('📋 Request config:', config);
       
       const response = await fetch(url, config);
       
-      console.log('Response status:', response.status);
+      console.log('📨 Response status:', response.status);
+      console.log('📨 Response headers:', Object.fromEntries(response.headers.entries()));
       console.log('Response headers:', response.headers);
       
       if (!response.ok) {

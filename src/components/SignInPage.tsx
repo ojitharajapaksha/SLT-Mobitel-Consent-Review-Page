@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Moon, Sun, ArrowLeft } from 'lucide-react';
+import { authService } from '../services/authService';
 
 interface SignInPageProps {
   onSignIn?: (credentials: SignInData) => void;
@@ -32,7 +33,7 @@ const SignInPage: React.FC<SignInPageProps> = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
+  const [errors, setErrors] = useState<{email?: string; password?: string; submit?: string}>({});
 
   const handleInputChange = (field: keyof Pick<SignInData, 'email' | 'password'>) => (
     e: React.ChangeEvent<HTMLInputElement>
@@ -84,14 +85,37 @@ const SignInPage: React.FC<SignInPageProps> = ({
     }
 
     setIsLoading(true);
+    setErrors({}); // Clear previous errors
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Use the authentication service to sign in
+      const response = await authService.signIn({
+        email: credentials.email,
+        password: credentials.password,
+        rememberMe: credentials.rememberMe
+      });
+
+      if (response.success && response.user) {
+        // Store user session
+        authService.storeUserSession(response.user);
+        
+        // Call the onSignIn callback
+        onSignIn?.(credentials);
+        
+        // Redirect to SLT website after successful sign in
+        window.location.href = 'https://myslt.slt.lk/';
+      } else {
+        // Show error message
+        setErrors({ submit: response.error || 'Sign in failed. Please try again.' });
+      }
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setErrors({ 
+        submit: error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.' 
+      });
+    } finally {
       setIsLoading(false);
-      onSignIn?.(credentials);
-      // Redirect to SLT website after successful sign in
-      window.location.href = 'https://myslt.slt.lk/';
-    }, 1500);
+    }
   };
 
   const themeClasses = darkMode 
@@ -153,6 +177,13 @@ const SignInPage: React.FC<SignInPageProps> = ({
 
         {/* Sign In Form */}
         <form onSubmit={handleSignIn} className="px-8 pb-8 space-y-6">
+          {/* Global Error Message */}
+          {errors.submit && (
+            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{errors.submit}</p>
+            </div>
+          )}
+
           {/* Email Field */}
           <div className="space-y-2">
             <label 

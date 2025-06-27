@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { testApiConnection } from '../services/api';
+import { authService } from '../services/authService';
 
 const ApiTestComponent: React.FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<'testing' | 'success' | 'failed' | 'hidden'>('testing');
@@ -8,7 +8,7 @@ const ApiTestComponent: React.FC = () => {
   useEffect(() => {
     const testConnection = async () => {
       try {
-        const isConnected = await testApiConnection();
+        const isConnected = await authService.testConnection();
         setConnectionStatus(isConnected ? 'success' : 'failed');
         if (!isConnected) {
           setErrorMessage('API connection test failed');
