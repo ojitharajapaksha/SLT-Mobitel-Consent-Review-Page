@@ -34,8 +34,9 @@ function App() {
   const handleSignUp = (userData: any, partyId: string) => {
     console.log('User signed up:', userData, 'Party ID:', partyId);
     // Here you would typically create the user account
-    alert('Account created successfully! You can now sign in.');
-    setCurrentPage('signin'); // Redirect to sign in after successful signup
+    // The success message is already shown in the SignUpPage component
+    // Redirect to sign in after successful signup
+    setCurrentPage('signin');
   };
 
   const handlePartySelect = (partyType: PartyType) => {

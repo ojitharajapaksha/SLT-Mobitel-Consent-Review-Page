@@ -125,12 +125,32 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
       }
       
       console.log('Party created successfully:', response);
-      onSignUp?.(userData, response._id || response.id);
+      
+      // Show success alert
+      alert('Account created successfully! You can now sign in with your credentials.');
+      
+      // Call the onSignUp callback with the response data
+      onSignUp?.(userData, response.data?._id || response.data?.id || response._id || response.id);
     } catch (error) {
       console.error('Error creating party:', error);
+      
+      let errorMessage = 'Failed to create account. Please try again.';
+      
+      if (error instanceof Error) {
+        // Check if it's a specific error from the backend
+        if (error.message.includes('already exists')) {
+          errorMessage = 'An account with this email already exists. Please use a different email or sign in.';
+        } else if (error.message.includes('Password')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('required')) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setErrors({ 
-        ...errors, 
-        submit: error instanceof Error ? error.message : 'Failed to create account. Please try again.' 
+        submit: errorMessage
       });
     } finally {
       setIsLoading(false);
