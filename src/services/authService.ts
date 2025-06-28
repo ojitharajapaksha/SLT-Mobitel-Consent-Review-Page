@@ -1,3 +1,5 @@
+import apiClient from './api';
+
 // Authentication service for the consent management system
 export interface SignInCredentials {
   email: string;
@@ -35,11 +37,11 @@ class AuthService {
     }
   }
 
-  // Simplified authentication - accepts any valid credentials
-  // Will be replaced with Firebase authentication later
+  // Authentication that checks against MongoDB database
+  // Will be enhanced with Firebase authentication later
   async signIn(credentials: SignInCredentials): Promise<AuthResponse> {
     try {
-      // Basic validation - just check if email and password are provided
+      // Basic validation - check if email and password are provided
       if (!credentials.email || !credentials.password) {
         return {
           success: false,
@@ -47,35 +49,127 @@ class AuthService {
         };
       }
 
-      // For demo purposes, accept any credentials that pass basic validation
-      // Simulate a brief delay to mimic real authentication
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Try to check if the user exists in MongoDB, with fallback
+      let individuals: any[] = [];
+      let organizations: any[] = [];
+      
+      try {
+        // Check if the user exists as an individual in MongoDB
+        const individualsResponse = await apiClient.get<any[]>('/tmf-api/party/v5/individual');
+        individuals = individualsResponse.data || [];
+        
+        // If not found as individual, check organizations
+        const organizationsResponse = await apiClient.get<any[]>('/tmf-api/party/v5/organization');
+        organizations = organizationsResponse.data || [];
+      } catch (apiError) {
+        console.log('MongoDB connection issue, using fallback authentication');
+        // Fallback: Accept any valid email/password for demo purposes
+        if (credentials.email.includes('@') && credentials.password.length >= 6) {
+          // Show success alert
+          alert('You have successfully logged in!');
+          
+          // Redirect to MySLT website
+          window.location.href = 'https://myslt.slt.lk/';
+          
+          const userName = credentials.email.split('@')[0];
+          return {
+            success: true,
+            user: {
+              id: `temp_${Date.now()}`,
+              email: credentials.email,
+              name: userName.charAt(0).toUpperCase() + userName.slice(1),
+              type: 'individual'
+            },
+            message: 'Sign in successful (fallback mode)'
+          };
+        } else {
+          return {
+            success: false,
+            error: 'Please enter a valid email and password (minimum 6 characters).'
+          };
+        }
+      }
+      
+      // Look for a user with matching email in authenticationContext or contactMedium
+      const matchingIndividual = individuals.find((individual: any) => {
+        // Check authenticationContext email first (for users created via sign-up)
+        if (individual.authenticationContext?.email === credentials.email) {
+          return true;
+        }
+        
+        // Also check contactMedium for legacy users
+        return individual.contactMedium?.some((contact: any) => 
+          contact.mediumType === 'email' && 
+          contact.characteristic?.emailAddress === credentials.email
+        );
+      });
 
-      // Generate a simple user object from the email
-      const userName = credentials.email.split('@')[0];
-      
-      // Show success alert
-      alert('You have successfully logged in!');
-      
-      // Redirect to MySLT website
-      window.location.href = 'https://myslt.slt.lk/';
-      
+      if (matchingIndividual) {
+        // For demo purposes, we'll accept any password for existing users
+        // In a real system with Firebase, you'd verify the password hash
+        
+        // Show success alert
+        alert('You have successfully logged in!');
+        
+        // Redirect to MySLT website
+        window.location.href = 'https://myslt.slt.lk/';
+        
+        return {
+          success: true,
+          user: {
+            id: matchingIndividual._id || matchingIndividual.id,
+            email: matchingIndividual.authenticationContext?.email || credentials.email,
+            name: matchingIndividual.fullName || `${matchingIndividual.givenName} ${matchingIndividual.familyName}`,
+            type: 'individual'
+          },
+          message: 'Sign in successful'
+        };
+      }
+
+      // If not found as individual, check organizations  
+      const matchingOrganization = organizations.find((org: any) => {
+        // Check authenticationContext email first
+        if (org.authenticationContext?.email === credentials.email) {
+          return true;
+        }
+        
+        // Also check contactMedium
+        return org.contactMedium?.some((contact: any) => 
+          contact.mediumType === 'email' && 
+          contact.characteristic?.emailAddress === credentials.email
+        );
+      });
+
+      if (matchingOrganization) {
+        // Show success alert
+        alert('You have successfully logged in!');
+        
+        // Redirect to MySLT website
+        window.location.href = 'https://myslt.slt.lk/';
+        
+        return {
+          success: true,
+          user: {
+            id: matchingOrganization._id || matchingOrganization.id,
+            email: matchingOrganization.authenticationContext?.email || credentials.email,
+            name: matchingOrganization.name || matchingOrganization.tradingName,
+            type: 'organization'
+          },
+          message: 'Sign in successful'
+        };
+      }
+
+      // User not found in database
       return {
-        success: true,
-        user: {
-          id: `user_${Date.now()}`, // Generate a simple ID
-          email: credentials.email,
-          name: userName.charAt(0).toUpperCase() + userName.slice(1), // Capitalize first letter
-          type: 'individual' // Default to individual for now
-        },
-        message: 'Sign in successful'
+        success: false,
+        error: 'Invalid email or password. Please check your credentials or sign up for a new account.'
       };
 
     } catch (error) {
       console.error('Sign in error:', error);
       return {
         success: false,
-        error: 'Sign in failed. Please try again.'
+        error: error instanceof Error ? error.message : 'Sign in failed. Please try again.'
       };
     }
   }

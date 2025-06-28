@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Moon, Sun, ArrowLeft, Check } from 'lucide-react';
-import { type PartyType, type SignUpFormData } from '../services/partyManagementService';
+import { partyManagementService, type PartyType, type SignUpFormData } from '../services/partyManagementService';
 
 interface SignUpPageProps {
   onSignUp?: (userData: SignUpFormData, partyId: string) => void;
@@ -117,25 +117,41 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
     setIsLoading(true);
     
     try {
-      // Simplified sign-up - just simulate creating an account
-      // Will be replaced with Firebase authentication later
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call delay
+      // Use party management service to save data to MongoDB
+      let response;
+      if (partyType === 'individual') {
+        response = await partyManagementService.createIndividual(userData);
+      } else {
+        response = await partyManagementService.createOrganization(userData);
+      }
       
-      console.log('Account created successfully (simulated):', userData);
+      console.log('User created successfully in MongoDB:', response);
       
       // Show success alert
       alert('Account created successfully! You can now sign in with your credentials.');
       
-      // Generate a simple user ID for the callback
-      const userId = `user_${Date.now()}`;
-      
       // Call the onSignUp callback with the response data
-      onSignUp?.(userData, userId);
+      onSignUp?.(userData, response.data?._id || response.data?.id || response._id || response.id);
     } catch (error) {
-      console.error('Error creating account:', error);
+      console.error('Error creating user in MongoDB:', error);
+      
+      let errorMessage = 'Failed to create account. Please try again.';
+      
+      if (error instanceof Error) {
+        // Check if it's a specific error from the backend
+        if (error.message.includes('already exists')) {
+          errorMessage = 'An account with this email already exists. Please use a different email or sign in.';
+        } else if (error.message.includes('Password')) {
+          errorMessage = error.message;
+        } else if (error.message.includes('required')) {
+          errorMessage = error.message;
+        } else {
+          errorMessage = error.message;
+        }
+      }
       
       setErrors({ 
-        submit: 'Failed to create account. Please try again.'
+        submit: errorMessage
       });
     } finally {
       setIsLoading(false);
