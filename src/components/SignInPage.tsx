@@ -102,8 +102,8 @@ const SignInPage: React.FC<SignInPageProps> = ({
         // Call the onSignIn callback
         onSignIn?.(credentials);
         
-        // Redirect to SLT website after successful sign in
-        window.location.href = 'https://myslt.slt.lk/';
+        // Redirect to MySLT website after successful sign in
+        window.location.href = 'https://myslt.lk/';
       } else {
         // Show error message
         setErrors({ submit: response.error || 'Sign in failed. Please try again.' });
