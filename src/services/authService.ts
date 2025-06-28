@@ -1,5 +1,3 @@
-import apiClient from './api';
-
 // Authentication service for the consent management system
 export interface SignInCredentials {
   email: string;
@@ -37,82 +35,47 @@ class AuthService {
     }
   }
 
-  // Since we don't have a dedicated sign-in endpoint, we'll simulate authentication
-  // by checking if a user with the given email exists in the system
+  // Simplified authentication - accepts any valid credentials
+  // Will be replaced with Firebase authentication later
   async signIn(credentials: SignInCredentials): Promise<AuthResponse> {
     try {
-      // First, check if the user exists as an individual
-      const individuals = await apiClient.get<any[]>('/tmf-api/party/v5/individual');
-      
-      // Look for a user with matching email in authenticationContext or contactMedium
-      const matchingIndividual = individuals.find(individual => {
-        // Check authenticationContext email first (for users created via sign-up)
-        if (individual.authenticationContext?.email === credentials.email) {
-          return true;
-        }
-        
-        // Also check contactMedium for legacy users
-        return individual.contactMedium?.some((contact: any) => 
-          contact.mediumType === 'email' && 
-          contact.characteristic?.emailAddress === credentials.email
-        );
-      });
-
-      if (matchingIndividual) {
-        // For demo purposes, we'll accept any password for existing users
-        // In a real system, you'd verify the password hash
+      // Basic validation - just check if email and password are provided
+      if (!credentials.email || !credentials.password) {
         return {
-          success: true,
-          user: {
-            id: matchingIndividual._id || matchingIndividual.id,
-            email: matchingIndividual.authenticationContext?.email || credentials.email,
-            name: matchingIndividual.fullName || `${matchingIndividual.givenName} ${matchingIndividual.familyName}`,
-            type: 'individual'
-          },
-          message: 'Sign in successful'
+          success: false,
+          error: 'Please provide both email and password.'
         };
       }
 
-      // If not found as individual, check organizations
-      const organizations = await apiClient.get<any[]>('/tmf-api/party/v5/organization');
+      // For demo purposes, accept any credentials that pass basic validation
+      // Simulate a brief delay to mimic real authentication
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Generate a simple user object from the email
+      const userName = credentials.email.split('@')[0];
       
-      const matchingOrganization = organizations.find(org => {
-        // Check authenticationContext email first
-        if (org.authenticationContext?.email === credentials.email) {
-          return true;
-        }
-        
-        // Also check contactMedium
-        return org.contactMedium?.some((contact: any) => 
-          contact.mediumType === 'email' && 
-          contact.characteristic?.emailAddress === credentials.email
-        );
-      });
-
-      if (matchingOrganization) {
-        return {
-          success: true,
-          user: {
-            id: matchingOrganization._id || matchingOrganization.id,
-            email: matchingOrganization.authenticationContext?.email || credentials.email,
-            name: matchingOrganization.name || matchingOrganization.tradingName,
-            type: 'organization'
-          },
-          message: 'Sign in successful'
-        };
-      }
-
-      // User not found
+      // Show success alert
+      alert('You have successfully logged in!');
+      
+      // Redirect to MySLT website
+      window.location.href = 'https://myslt.slt.lk/';
+      
       return {
-        success: false,
-        error: 'Invalid email or password. Please check your credentials or sign up for a new account.'
+        success: true,
+        user: {
+          id: `user_${Date.now()}`, // Generate a simple ID
+          email: credentials.email,
+          name: userName.charAt(0).toUpperCase() + userName.slice(1), // Capitalize first letter
+          type: 'individual' // Default to individual for now
+        },
+        message: 'Sign in successful'
       };
 
     } catch (error) {
       console.error('Sign in error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Sign in failed. Please try again.'
+        error: 'Sign in failed. Please try again.'
       };
     }
   }
