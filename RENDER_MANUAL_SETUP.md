@@ -41,10 +41,10 @@ FRONTEND_URL=https://slt-mobitel-consent-review-page.vercel.app
 # Plan: Starter (Free)
 
 # Environment Variables to set in Render Dashboard:
-# VITE_API_BASE_URL=https://slt-mobitel-consent-review-backend.onrender.com
-# VITE_HEALTH_URL=https://slt-mobitel-consent-review-backend.onrender.com/health
-# VITE_TMF_API_BASE_URL=https://slt-mobitel-consent-review-backend.onrender.com/tmf-api/party/v5
-# VITE_CONSENT_API_URL=https://slt-mobitel-consent-review-backend.onrender.com/tmf-api/consent/v1
-# (Replace with your actual backend URL after backend deployment)
+# VITE_API_BASE_URL=https://party-management-backend-new.onrender.com
+# VITE_HEALTH_URL=https://party-management-backend-new.onrender.com/health
+# VITE_TMF_API_BASE_URL=https://party-management-backend-new.onrender.com/tmf-api/party/v5
+# VITE_CONSENT_API_URL=https://party-management-backend-new.onrender.com/tmf-api/consent/v1
+# ⚠️ IMPORTANT: Use your ACTUAL backend URL (party-management-backend-new.onrender.com)
 
 # Auto-Deploy: Yes
