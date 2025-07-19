@@ -16,9 +16,32 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-// CORS configuration - temporarily allow all origins for local testing
+// CORS configuration
 const corsOptions = {
-  origin: true, // Allow all origins for local testing
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Define allowed origins
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'http://localhost:3000', // Local backend
+      'http://localhost:5173', // Local frontend (default)
+      'http://localhost:5174', // Local frontend (alternate port)
+      'http://localhost:5175', // Local frontend (alternate port 2)
+      'http://localhost:5176', // Local frontend (alternate port 3)
+      'http://localhost:5177', // Local frontend (alternate port 4)
+      'http://localhost:5178', // Local frontend (alternate port 5)
+      'https://slt-mobitel-consent-review-page.vercel.app', // Production frontend
+    ];
+    
+    // Check if origin is allowed
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key']

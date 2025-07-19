@@ -1,5 +1,10 @@
 // API Configuration
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, ''); // Remove trailing slashes
+const API_BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.MODE === 'production' 
+    ? 'https://party-management-backend-new.onrender.com' 
+    : 'http://localhost:3000')
+).replace(/\/+$/, ''); // Remove trailing slashes
 
 // Debug: Log the API base URL
 console.log('🔗 API_BASE_URL:', API_BASE_URL);

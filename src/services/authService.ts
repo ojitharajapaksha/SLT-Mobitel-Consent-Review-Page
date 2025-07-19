@@ -23,7 +23,10 @@ class AuthService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    this.baseURL = import.meta.env.VITE_API_BASE_URL || 
+      (import.meta.env.MODE === 'production' 
+        ? 'https://party-management-backend-new.onrender.com' 
+        : 'http://localhost:3000');
   }
 
   // Test API connection
