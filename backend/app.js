@@ -94,10 +94,17 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
-    message: 'SLT-Mobitel Account Service API is running',
+    message: 'SLT-Mobitel Account Service API is running with TMF endpoints',
     timestamp: new Date().toISOString(),
     service: 'account-service',
-    version: '1.0.0'
+    version: '1.0.1',
+    endpoints: {
+      health: '/health',
+      register: '/api/register',
+      customerData: '/api/customer-data',
+      tmfPartyIndividual: '/tmf-api/party/v5/individual',
+      tmfConsent: '/tmf-api/consent/v1/consent'
+    }
   });
 });
 
