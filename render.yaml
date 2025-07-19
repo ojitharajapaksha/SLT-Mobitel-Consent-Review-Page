@@ -1,17 +1,16 @@
 # 🎯 Complete Render Deployment Configuration
 # This file defines both frontend and backend services for Render
 
-version: "1"
-
 services:
   # Backend Service (Node.js API)
   - type: web
     name: slt-mobitel-consent-review-backend
-    runtime: node
-    plan: starter
+    env: node
+    plan: free
     rootDir: backend
-    buildCommand: npm ci
-    startCommand: npm start
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -38,16 +37,13 @@ services:
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
         value: 50
-    healthCheckPath: /health
-    autoDeploy: true
-    rootDir: backend
     
   # Frontend Service (React + Vite)  
   - type: web
     name: slt-mobitel-consent-review-frontend
-    runtime: node
-    plan: starter
-    buildCommand: npm ci && npm run build
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_BASE_URL
@@ -75,8 +71,6 @@ services:
         transform: "${value}/tmf-api/consent/v1"
       - key: NODE_ENV
         value: production
-    pullRequestPreviewsEnabled: true
-    autoDeploy: true
 
 # 📝 Manual Setup Required:
 # 1. Set MONGO_URI in backend environment variables via Render dashboard
