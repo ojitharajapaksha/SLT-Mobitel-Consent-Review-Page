@@ -9,8 +9,9 @@ services:
     name: slt-mobitel-consent-review-backend
     runtime: node
     plan: starter
-    buildCommand: cd backend && npm ci
-    startCommand: cd backend && npm start
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
