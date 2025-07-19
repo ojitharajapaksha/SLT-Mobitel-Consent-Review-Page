@@ -115,17 +115,91 @@ router.get('/individual/:id', async (req, res) => {
  */
 router.get('/individual', async (req, res) => {
   try {
-    // In a real implementation, you would fetch from database with pagination
-    res.json({
-      parties: [],
-      totalCount: 0,
-      message: 'Individual parties retrieved (mock response)'
-    });
+    console.log('[TMF-API] Listing all individual parties');
+    
+    // TODO: In a real implementation, fetch from database
+    // For now, return an empty array to match frontend expectations
+    const individuals = [];
+    
+    res.json(individuals);
     
   } catch (error) {
     console.error('[TMF-API] Error listing individual parties:', error);
     res.status(500).json({
       message: 'Failed to list individual parties',
+      error: 'INTERNAL_SERVER_ERROR'
+    });
+  }
+});
+
+/**
+ * GET /tmf-api/party/v5/organization
+ * List all organization parties
+ */
+router.get('/organization', async (req, res) => {
+  try {
+    console.log('[TMF-API] Listing all organization parties');
+    
+    // TODO: In a real implementation, fetch from database
+    // For now, return an empty array to match frontend expectations
+    const organizations = [];
+    
+    res.json(organizations);
+    
+  } catch (error) {
+    console.error('[TMF-API] Error listing organization parties:', error);
+    res.status(500).json({
+      message: 'Failed to list organization parties',
+      error: 'INTERNAL_SERVER_ERROR'
+    });
+  }
+});
+
+/**
+ * POST /tmf-api/party/v5/organization
+ * Create a new organization party
+ */
+router.post('/organization', async (req, res) => {
+  try {
+    console.log('[TMF-API] Creating organization party:', req.body);
+    
+    const { organizationName, organizationType, ...otherData } = req.body;
+    
+    // Generate party ID
+    const partyId = uuidv4();
+    
+    // Create organization data following TMF641 standard
+    const partyData = {
+      id: partyId,
+      partyType: 'organization',
+      name: organizationName || 'Unnamed Organization',
+      status: 'active',
+      organizationType: organizationType || 'company',
+      contactInformation: [],
+      characteristics: [
+        {
+          name: 'organizationType',
+          value: organizationType || 'company',
+          valueType: 'string'
+        },
+        {
+          name: 'registrationSource',
+          value: 'SLT-Mobitel-Consent-Review-Page',
+          valueType: 'string'
+        }
+      ],
+      creationDate: new Date().toISOString(),
+      lastUpdate: new Date().toISOString()
+    };
+    
+    console.log('[TMF-API] Organization created successfully:', partyId);
+    
+    res.status(201).json(partyData);
+    
+  } catch (error) {
+    console.error('[TMF-API] Error creating organization party:', error);
+    res.status(500).json({
+      message: 'Failed to create organization party',
       error: 'INTERNAL_SERVER_ERROR'
     });
   }
