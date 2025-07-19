@@ -19,6 +19,7 @@ NODE_ENV=production
 PORT=10000
 MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/consenthub-users?retryWrites=true&w=majority
 CONSENTHUB_API=https://party-management-backend-new.onrender.com
+FRONTEND_URL=https://slt-mobitel-consent-review-page.vercel.app
 # INTERNAL_API_KEY, JWT_SECRET, SESSION_SECRET will be auto-generated
 
 # Health Check Path: /health
@@ -41,6 +42,9 @@ CONSENTHUB_API=https://party-management-backend-new.onrender.com
 
 # Environment Variables to set in Render Dashboard:
 # VITE_API_BASE_URL=https://slt-mobitel-consent-review-backend.onrender.com
+# VITE_HEALTH_URL=https://slt-mobitel-consent-review-backend.onrender.com/health
+# VITE_TMF_API_BASE_URL=https://slt-mobitel-consent-review-backend.onrender.com/tmf-api/party/v5
+# VITE_CONSENT_API_URL=https://slt-mobitel-consent-review-backend.onrender.com/tmf-api/consent/v1
 # (Replace with your actual backend URL after backend deployment)
 
 # Auto-Deploy: Yes
