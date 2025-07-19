@@ -75,7 +75,34 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       register: '/api/v1/register',
-      health: '/api/v1/health'
+      health: '/health',
+      api_health: '/api/v1/health'
+    }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    message: 'SLT-Mobitel Account Service API is running',
+    timestamp: new Date().toISOString(),
+    service: 'account-service',
+    version: '1.0.0'
+  });
+});
+
+// API Health check endpoint
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    message: 'SLT-Mobitel Account Service API is running',
+    timestamp: new Date().toISOString(),
+    service: 'account-service',
+    version: '1.0.0',
+    endpoints: {
+      register: '/api/v1/register',
+      customers: '/api/v1/customers'
     }
   });
 });
