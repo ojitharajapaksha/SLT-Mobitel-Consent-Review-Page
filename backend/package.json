@@ -1,7 +1,7 @@
 {
   "name": "slt-mobitel-consenthub-backend",
-  "version": "1.0.0",
-  "description": "Backend API for SLT-Mobitel ConsentHub customer registration and management",
+  "version": "1.0.2",
+  "description": "Backend API for SLT-Mobitel ConsentHub customer registration and management with duplicate account validation",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
