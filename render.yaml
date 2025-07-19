@@ -1,0 +1,83 @@
+# 🎯 Complete Render Deployment Configuration
+# This file defines both frontend and backend services for Render
+
+version: "1"
+
+services:
+  # Backend Service (Node.js API)
+  - type: web
+    name: slt-mobitel-consent-review-backend
+    runtime: node
+    plan: starter
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false  # ⚠️ Set manually in Render dashboard with MongoDB Atlas connection
+      - key: CONSENTHUB_API
+        value: https://party-management-backend-new.onrender.com
+      - key: INTERNAL_API_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: slt-mobitel-consent-review-frontend
+          property: url
+      - key: LOG_LEVEL
+        value: error
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 50
+    healthCheckPath: /health
+    autoDeploy: true
+    rootDir: backend
+    
+  # Frontend Service (React + Vite)  
+  - type: web
+    name: slt-mobitel-consent-review-frontend
+    runtime: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: slt-mobitel-consent-review-backend
+          property: url
+      - key: VITE_HEALTH_URL
+        fromService:
+          type: web
+          name: slt-mobitel-consent-review-backend
+          property: url
+        transform: "${value}/health"
+      - key: VITE_TMF_API_BASE_URL
+        fromService:
+          type: web
+          name: slt-mobitel-consent-review-backend
+          property: url
+        transform: "${value}/tmf-api/party/v5"
+      - key: VITE_CONSENT_API_URL
+        fromService:
+          type: web
+          name: slt-mobitel-consent-review-backend
+          property: url
+        transform: "${value}/tmf-api/consent/v1"
+      - key: NODE_ENV
+        value: production
+    pullRequestPreviewsEnabled: true
+    autoDeploy: true
+
+# 📝 Manual Setup Required:
+# 1. Set MONGO_URI in backend environment variables via Render dashboard
+#    Format: mongodb+srv://username:password@cluster.mongodb.net/consenthub-users?retryWrites=true&w=majority
+# 2. All other environment variables will be automatically generated or linked

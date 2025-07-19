@@ -7,6 +7,7 @@ require('dotenv').config();
 
 // Import routes
 const registerRoutes = require('./routes/register.routes');
+const customerDataRoutes = require('./routes/customerData.routes');
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use((req, res, next) => {
 
 // API Routes
 app.use('/api/v1', registerRoutes);
+app.use('/api/v1', customerDataRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

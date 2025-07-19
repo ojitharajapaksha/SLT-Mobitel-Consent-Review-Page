@@ -1,0 +1,27 @@
+# Render Deployment Configuration for Backend
+# Backend Service (Node.js + Express + MongoDB)
+
+# Build Command
+npm install
+
+# Start Command  
+npm start
+
+# Environment Variables (Set these in Render Dashboard):
+# NODE_ENV=production
+# MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/consenthub-users
+# INTERNAL_API_KEY=your-secure-production-api-key
+# JWT_SECRET=your-production-jwt-secret
+# SESSION_SECRET=your-production-session-secret
+# FRONTEND_URL=https://your-frontend-app.onrender.com
+# PARTY_SERVICE_URL=http://localhost:3009
+# AUTH_SERVICE_URL=http://localhost:3007  
+# CONSENT_SERVICE_URL=http://localhost:3008
+# PREFERENCE_SERVICE_URL=http://localhost:3010
+# PORT=10000
+
+# Health Check Path
+/health
+
+# Auto Deploy
+Yes (when backend/ folder changes)

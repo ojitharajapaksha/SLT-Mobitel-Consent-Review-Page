@@ -10,7 +10,10 @@
     "test:watch": "jest --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "seed": "node scripts/seedDatabase.js"
+    "seed": "node scripts/seedDatabase.js",
+    "test:consenthub": "node test-consenthub-service.js",
+    "validate": "node validate-integration.js",
+    "check:syntax": "node -c services/consentHub.service.js && node -c controllers/register.controller.js"
   },
   "keywords": [
     "nodejs",
