@@ -139,8 +139,8 @@ const SignUpPage: React.FC<SignUpPageProps> = ({
       
       if (error instanceof Error) {
         // Check if it's a specific error from the backend
-        if (error.message.includes('already exists')) {
-          errorMessage = 'An account with this email already exists. Please use a different email or sign in.';
+        if (error.message.includes('USER_ALREADY_EXISTS') || error.message.includes('already exists')) {
+          errorMessage = 'You have an account, please log in. An account with this email already exists.';
         } else if (error.message.includes('Password')) {
           errorMessage = error.message;
         } else if (error.message.includes('required')) {

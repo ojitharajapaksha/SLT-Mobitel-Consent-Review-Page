@@ -21,6 +21,21 @@ router.post('/individual', async (req, res) => {
     
     const { givenName, familyName, subscribeToNewsletter, email, password, ...otherData } = req.body;
     
+    // Check if user with this email already exists
+    const existingIndividual = individuals.find(individual => 
+      individual.authenticationContext?.email === email
+    );
+    
+    if (existingIndividual) {
+      console.log('[TMF-API] User with email already exists:', email);
+      return res.status(409).json({
+        message: 'You have an account, please log in',
+        error: 'USER_ALREADY_EXISTS',
+        details: 'An account with this email address already exists. Please sign in instead.',
+        existingEmail: email
+      });
+    }
+    
     // Generate party ID
     const partyId = uuidv4();
     
@@ -180,7 +195,25 @@ router.post('/organization', async (req, res) => {
   try {
     console.log('[TMF-API] Creating organization party:', req.body);
     
-    const { organizationName, organizationType, ...otherData } = req.body;
+    const { organizationName, organizationType, email, password, ...otherData } = req.body;
+    
+    // Check if user with this email already exists (in both individuals and organizations)
+    const existingIndividual = individuals.find(individual => 
+      individual.authenticationContext?.email === email
+    );
+    const existingOrganization = organizations.find(org => 
+      org.authenticationContext?.email === email
+    );
+    
+    if (existingIndividual || existingOrganization) {
+      console.log('[TMF-API] User with email already exists:', email);
+      return res.status(409).json({
+        message: 'You have an account, please log in',
+        error: 'USER_ALREADY_EXISTS',
+        details: 'An account with this email address already exists. Please sign in instead.',
+        existingEmail: email
+      });
+    }
     
     // Generate party ID
     const partyId = uuidv4();
@@ -193,6 +226,14 @@ router.post('/organization', async (req, res) => {
       status: 'active',
       organizationType: organizationType || 'company',
       contactInformation: [],
+      // Add authentication context for sign-in
+      authenticationContext: {
+        email: email,
+        password: password, // In production, this should be hashed
+        agreedToTerms: otherData.agreeToTerms || false,
+        subscribedToNewsletter: otherData.subscribeToNewsletter || false,
+        accountCreationDate: new Date().toISOString()
+      },
       characteristics: [
         {
           name: 'organizationType',
