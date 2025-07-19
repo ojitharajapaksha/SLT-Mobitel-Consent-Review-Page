@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/+$/, ''); // Remove trailing slashes
 
 // Debug: Log the API base URL
 console.log('🔗 API_BASE_URL:', API_BASE_URL);
@@ -142,7 +142,9 @@ export type PartyType = 'individual' | 'organization';
 
 class PartyManagementService {
   private async makeRequest(endpoint: string, options: RequestInit = {}) {
-    const url = `${API_BASE_URL}${endpoint}`;
+    // Clean up the endpoint to prevent double slashes
+    const cleanEndpoint = endpoint.replace(/^\/+/, '/');
+    const url = `${API_BASE_URL}${cleanEndpoint}`;
     
     const config: RequestInit = {
       headers: {
