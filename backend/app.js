@@ -8,6 +8,8 @@ require('dotenv').config();
 // Import routes
 const registerRoutes = require('./routes/register.routes');
 const customerDataRoutes = require('./routes/customerData.routes');
+const tmfPartyRoutes = require('./routes/tmf-party.routes');
+const tmfConsentRoutes = require('./routes/tmf-consent.routes');
 
 const app = express();
 
@@ -66,6 +68,10 @@ app.use((req, res, next) => {
 app.use('/api/v1', registerRoutes);
 app.use('/api/v1', customerDataRoutes);
 
+// TMF API Routes
+app.use('/tmf-api/party/v5', tmfPartyRoutes);
+app.use('/tmf-api/consent/v1', tmfConsentRoutes);
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({
@@ -75,8 +81,11 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       register: '/api/v1/register',
+      customers: '/api/v1/customers',
       health: '/health',
-      api_health: '/api/v1/health'
+      api_health: '/api/v1/health',
+      tmf_party: '/tmf-api/party/v5/individual',
+      tmf_consent: '/tmf-api/consent/v1/consent'
     }
   });
 });
