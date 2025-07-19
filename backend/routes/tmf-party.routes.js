@@ -7,6 +7,10 @@ const { v4: uuidv4 } = require('uuid');
  * Implements TMF641 Party Management API standard
  */
 
+// In-memory storage for demo purposes (in production, use MongoDB)
+const individuals = [];
+const organizations = [];
+
 /**
  * POST /tmf-api/party/v5/individual
  * Create a new individual party
@@ -15,7 +19,7 @@ router.post('/individual', async (req, res) => {
   try {
     console.log('[TMF-API] Creating individual party:', req.body);
     
-    const { givenName, familyName, subscribeToNewsletter, ...otherData } = req.body;
+    const { givenName, familyName, subscribeToNewsletter, email, password, ...otherData } = req.body;
     
     // Generate party ID
     const partyId = uuidv4();
@@ -27,6 +31,14 @@ router.post('/individual', async (req, res) => {
       name: `${givenName} ${familyName}`,
       status: 'active',
       contactInformation: [],
+      // Add authentication context for sign-in
+      authenticationContext: {
+        email: email,
+        password: password, // In production, this should be hashed
+        agreedToTerms: otherData.agreeToTerms || false,
+        subscribedToNewsletter: subscribeToNewsletter || false,
+        accountCreationDate: new Date().toISOString()
+      },
       characteristics: [
         {
           name: 'givenName',
@@ -36,6 +48,11 @@ router.post('/individual', async (req, res) => {
         {
           name: 'familyName', 
           value: familyName,
+          valueType: 'string'
+        },
+        {
+          name: 'email',
+          value: email,
           valueType: 'string'
         },
         {
@@ -65,6 +82,10 @@ router.post('/individual', async (req, res) => {
     });
     
     console.log('[TMF-API] Party created successfully:', partyId);
+    
+    // Store the created party in memory for authentication
+    individuals.push(partyData);
+    console.log('[TMF-API] Total individuals stored:', individuals.length);
     
     res.status(201).json({
       ...partyData,
@@ -116,11 +137,9 @@ router.get('/individual/:id', async (req, res) => {
 router.get('/individual', async (req, res) => {
   try {
     console.log('[TMF-API] Listing all individual parties');
+    console.log('[TMF-API] Found', individuals.length, 'individuals in storage');
     
-    // TODO: In a real implementation, fetch from database
-    // For now, return an empty array to match frontend expectations
-    const individuals = [];
-    
+    // Return the actual stored individuals instead of empty array
     res.json(individuals);
     
   } catch (error) {
@@ -139,11 +158,9 @@ router.get('/individual', async (req, res) => {
 router.get('/organization', async (req, res) => {
   try {
     console.log('[TMF-API] Listing all organization parties');
+    console.log('[TMF-API] Found', organizations.length, 'organizations in storage');
     
-    // TODO: In a real implementation, fetch from database
-    // For now, return an empty array to match frontend expectations
-    const organizations = [];
-    
+    // Return the actual stored organizations instead of empty array
     res.json(organizations);
     
   } catch (error) {
@@ -193,6 +210,10 @@ router.post('/organization', async (req, res) => {
     };
     
     console.log('[TMF-API] Organization created successfully:', partyId);
+    
+    // Store the created organization in memory for authentication
+    organizations.push(partyData);
+    console.log('[TMF-API] Total organizations stored:', organizations.length);
     
     res.status(201).json(partyData);
     
